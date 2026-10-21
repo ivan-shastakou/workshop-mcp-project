@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="720" viewBox="0 0 1400 720" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-key" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b45309"/>
+    </marker>
+    <marker id="arrow-mcp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/>
+    </marker>
+    <style>
+      .title { font-size: 22px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 13px; fill: #475569; }
+      .name { font-size: 15px; font-weight: 700; fill: #0f172a; }
+      .sub { font-size: 12px; fill: #334155; }
+      .small { font-size: 11px; fill: #475569; }
+      .new-text { font-size: 11px; fill: #6d28d9; font-weight: 600; }
+      .edge { font-size: 11px; fill: #334155; }
+      .key { font-size: 11px; fill: #b45309; }
+      .mcp-label { font-size: 12px; fill: #6d28d9; font-weight: 700; }
+      .ui { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.5; }
+      .svc { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; }
+      .svc-new { fill: #dcfce7; stroke: #7c3aed; stroke-width: 3; }
+      .db { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; }
+      .ext { fill: #f3e8ff; stroke: #9333ea; stroke-width: 1.5; }
+      .user { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.5; }
+      .line { stroke: #475569; stroke-width: 1.5; fill: none; }
+      .jwks { stroke: #b45309; stroke-width: 1.5; stroke-dasharray: 6 4; fill: none; }
+      .mcp { stroke: #7c3aed; stroke-width: 3; fill: none; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="720" fill="#ffffff"/>
+  <text x="30" y="36" class="title">Booking service as an MCP server (step4 + step5)</text>
+  <text x="30" y="56" class="subtitle">Purple = added in step4 (server, token relay) and step5 (tools). The same backend serves the REST API for the UI and MCP tools for AI clients.</text>
+
+  <!-- Compose profiles -->
+  <rect x="30" y="140" width="1050" height="480" rx="14" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="8 5"/>
+  <text x="45" y="612" class="small">Docker Compose profile <tspan font-weight="700">full</tspan> (everything)</text>
+  <rect x="405" y="155" width="660" height="450" rx="12" fill="#f8fafc" fill-opacity="0.6" stroke="#64748b" stroke-width="1.5" stroke-dasharray="3 4"/>
+  <text x="1050" y="597" class="small" text-anchor="end">profile <tspan font-weight="700">chat</tspan>: no backend, so the booking MCP shows as unavailable</text>
+
+  <!-- Clients -->
+  <rect x="440" y="72" width="220" height="44" rx="22" class="user"/>
+  <text x="550" y="99" class="name" text-anchor="middle">Browser (user)</text>
+
+  <rect x="60" y="68" width="300" height="52" rx="10" class="ext"/>
+  <text x="210" y="90" class="name" text-anchor="middle">External MCP clients</text>
+  <text x="210" y="108" class="small" text-anchor="middle">MCP Inspector, Claude Desktop, IDE + user's JWT</text>
+
+  <!-- UIs -->
+  <rect x="110" y="190" width="260" height="70" rx="10" class="ui"/>
+  <text x="240" y="215" class="name" text-anchor="middle">frontend  :3000</text>
+  <text x="240" y="233" class="sub" text-anchor="middle">Booking UI: React + FullCalendar</text>
+  <text x="240" y="250" class="new-text" text-anchor="middle">🔌 MCP: user adds "booking" + others</text>
+
+  <rect x="660" y="190" width="260" height="70" rx="10" class="ui"/>
+  <text x="790" y="215" class="name" text-anchor="middle">chat-ui  :3001</text>
+  <text x="790" y="233" class="sub" text-anchor="middle">Standalone chat UI: React</text>
+  <text x="790" y="250" class="new-text" text-anchor="middle">🔌 MCP: user adds "booking" + others</text>
+
+  <!-- Services -->
+  <rect x="40" y="340" width="280" height="88" rx="10" class="svc-new"/>
+  <text x="180" y="363" class="name" text-anchor="middle">backend  :8080</text>
+  <text x="180" y="381" class="sub" text-anchor="middle">REST /api/* (UI)</text>
+  <text x="180" y="398" class="new-text" text-anchor="middle">+ MCP server /mcp (Streamable HTTP)</text>
+  <text x="180" y="414" class="new-text" text-anchor="middle">@McpTool → RoomService, BookingService</text>
+
+  <rect x="430" y="340" width="240" height="80" rx="10" class="svc"/>
+  <text x="550" y="366" class="name" text-anchor="middle">auth-service  :8081</text>
+  <text x="550" y="385" class="sub" text-anchor="middle">Register / login, issues RS256 JWT</text>
+  <text x="550" y="403" class="small" text-anchor="middle">JWKS: /.well-known/jwks.json</text>
+
+  <rect x="800" y="340" width="240" height="88" rx="10" class="svc-new"/>
+  <text x="920" y="363" class="name" text-anchor="middle">chat-service  :8082</text>
+  <text x="920" y="381" class="sub" text-anchor="middle">Spring AI ChatClient + MCP clients</text>
+  <text x="920" y="398" class="new-text" text-anchor="middle">+ "Send my login token" option</text>
+  <text x="920" y="414" class="new-text" text-anchor="middle">relays the user's JWT on every call</text>
+
+  <!-- Databases -->
+  <g>
+    <path d="M80,502 v58 a100,12 0 0,0 200,0 v-58" class="db"/>
+    <ellipse cx="180" cy="502" rx="100" ry="12" class="db"/>
+    <text x="180" y="535" class="name" text-anchor="middle">postgres  :5432</text>
+    <text x="180" y="553" class="small" text-anchor="middle">db roombooking: room, booking</text>
+  </g>
+  <g>
+    <path d="M450,502 v58 a100,12 0 0,0 200,0 v-58" class="db"/>
+    <ellipse cx="550" cy="502" rx="100" ry="12" class="db"/>
+    <text x="550" y="535" class="name" text-anchor="middle">auth-db  :5433</text>
+    <text x="550" y="553" class="small" text-anchor="middle">db auth: app_user, signing_key</text>
+  </g>
+  <g>
+    <path d="M820,502 v72 a100,12 0 0,0 200,0 v-72" class="db"/>
+    <ellipse cx="920" cy="502" rx="100" ry="12" class="db"/>
+    <text x="920" y="535" class="name" text-anchor="middle">chat-db  :5434</text>
+    <text x="920" y="553" class="small" text-anchor="middle">spring_ai_chat_memory,</text>
+    <text x="920" y="568" class="small" text-anchor="middle">mcp_server (+ forward_user_token)</text>
+  </g>
+
+  <!-- External services -->
+  <text x="1240" y="270" class="small" text-anchor="middle" font-weight="700">External (internet)</text>
+  <rect x="1130" y="285" width="220" height="64" rx="10" class="ext"/>
+  <text x="1240" y="310" class="name" text-anchor="middle">Google Gemini API</text>
+  <text x="1240" y="330" class="small" text-anchor="middle">decides which tool to call</text>
+
+  <rect x="1130" y="410" width="220" height="64" rx="10" class="ext"/>
+  <text x="1240" y="435" class="name" text-anchor="middle">Remote MCP servers</text>
+  <text x="1240" y="455" class="small" text-anchor="middle">added by users, https only</text>
+
+  <!-- Browser and external clients to UIs -->
+  <path d="M500,116 L270,188" class="line" marker-end="url(#arrow)"/>
+  <path d="M600,116 L760,188" class="line" marker-end="url(#arrow)"/>
+  <path d="M190,120 L190,188" class="mcp" marker-end="url(#arrow-mcp)"/>
+  <text x="200" y="170" class="mcp-label">/mcp</text>
+
+  <!-- frontend nginx routes -->
+  <path d="M175,260 L165,338" class="line" marker-end="url(#arrow)"/>
+  <path d="M205,260 L200,338" class="mcp" marker-end="url(#arrow-mcp)"/>
+  <text x="78" y="302" class="edge">/api/*</text>
+  <text x="210" y="302" class="mcp-label">/mcp</text>
+  <path d="M280,260 L500,338" class="line" marker-end="url(#arrow)"/>
+  <text x="360" y="322" class="edge">/api/auth</text>
+  <path d="M340,260 C520,295 760,300 860,338" class="line" marker-end="url(#arrow)"/>
+  <text x="520" y="276" class="edge">/api/chat, /api/mcp</text>
+
+  <!-- chat-ui nginx routes -->
+  <path d="M740,260 L610,338" class="line" marker-end="url(#arrow)"/>
+  <text x="640" y="328" class="edge">/api/auth</text>
+  <path d="M840,260 L900,338" class="line" marker-end="url(#arrow)"/>
+  <text x="880" y="290" class="edge">/api/chat, /api/mcp</text>
+
+  <!-- JWT verification -->
+  <path d="M320,375 L428,375" class="jwks" marker-end="url(#arrow-key)"/>
+  <text x="374" y="367" class="key" text-anchor="middle">JWKS</text>
+  <path d="M800,375 L672,375" class="jwks" marker-end="url(#arrow-key)"/>
+  <text x="736" y="367" class="key" text-anchor="middle">JWKS</text>
+
+  <!-- NEW: chat-service calls the booking MCP server -->
+  <path d="M860,428 L860,458 Q860,466 852,466 L268,466 Q260,466 260,458 L260,431" class="mcp" marker-end="url(#arrow-mcp)"/>
+  <text x="280" y="459" class="mcp-label">MCP http://backend:8080/mcp + user's JWT</text>
+
+  <!-- Services to databases -->
+  <path d="M130,428 L130,488" class="line" marker-end="url(#arrow)"/>
+  <path d="M550,420 L550,488" class="line" marker-end="url(#arrow)"/>
+  <path d="M960,428 L960,488" class="line" marker-end="url(#arrow)"/>
+  <text x="88" y="452" class="edge">JDBC</text>
+  <text x="558" y="442" class="edge">JDBC</text>
+  <text x="968" y="452" class="edge">JDBC</text>
+
+  <!-- chat-service to external -->
+  <path d="M1040,360 L1128,322" class="line" marker-end="url(#arrow)"/>
+  <text x="1086" y="310" class="edge">HTTPS</text>
+  <path d="M1040,402 L1128,438" class="line" marker-end="url(#arrow)"/>
+  <text x="1086" y="450" class="edge">MCP</text>
+
+  <!-- Legend -->
+  <g transform="translate(30,648)">
+    <path d="M0,8 L40,8" class="line" marker-end="url(#arrow)"/>
+    <text x="50" y="12" class="small">HTTP request (nginx route) / JDBC</text>
+    <path d="M250,8 L290,8" class="jwks" marker-end="url(#arrow-key)"/>
+    <text x="300" y="12" class="small">JWT verification (public keys from auth-service)</text>
+    <path d="M590,8 L630,8" class="mcp" marker-end="url(#arrow-mcp)"/>
+    <text x="640" y="12" class="small">NEW: MCP call, authenticated with the user's JWT; booking organizer = that user</text>
+    <rect x="0" y="30" width="16" height="12" class="ui"/><text x="22" y="40" class="small">UI (nginx)</text>
+    <rect x="110" y="30" width="16" height="12" class="svc"/><text x="132" y="40" class="small">Spring Boot service</text>
+    <rect x="270" y="30" width="16" height="12" class="svc-new"/><text x="292" y="40" class="small">Changed service</text>
+    <rect x="400" y="30" width="16" height="12" class="db"/><text x="422" y="40" class="small">PostgreSQL 18</text>
+    <rect x="530" y="30" width="16" height="12" class="ext"/><text x="552" y="40" class="small">External / MCP client</text>
+  </g>
+</svg>
