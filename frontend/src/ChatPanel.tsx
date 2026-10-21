@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import Markdown from 'react-markdown';
 import { api } from './api';
-import type { ChatMessage, User } from './types';
+import McpPanel from './McpPanel';
+import type { ChatMessage, McpServer, User } from './types';
 
 const SUGGESTIONS = [
   'How do I book a meeting room?',
@@ -16,6 +17,8 @@ export default function ChatPanel({ user }: { user: User }) {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mcpOpen, setMcpOpen] = useState(false);
+  const [mcpServers, setMcpServers] = useState<McpServer[]>([]);
   const abortRef = useRef<AbortController | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -39,11 +42,11 @@ export default function ChatPanel({ user }: { user: User }) {
   }, [messages, busy]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || mcpOpen) return;
     const onKey = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && setOpen(false);
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
+  }, [open, mcpOpen]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -103,6 +106,7 @@ export default function ChatPanel({ user }: { user: User }) {
   };
 
   const firstName = user.fullName.split(' ')[0];
+  const activeServers = mcpServers.filter((s) => s.enabled).length;
 
   return (
     <>
@@ -119,6 +123,9 @@ export default function ChatPanel({ user }: { user: User }) {
             <small>Powered by Gemini</small>
           </div>
           <div className="chat-header-actions">
+            <button type="button" className="mcp-button" onClick={() => setMcpOpen(true)} title="Configure MCP servers">
+              🔌 MCP{activeServers > 0 && <span className="badge">{activeServers}</span>}
+            </button>
             <button type="button" onClick={clearChat} disabled={messages.length === 0} title="Start a new conversation">
               New chat
             </button>
@@ -168,6 +175,9 @@ export default function ChatPanel({ user }: { user: User }) {
           </button>
         </form>
       </aside>
+
+      {mcpOpen && <div className="mcp-backdrop" onClick={() => setMcpOpen(false)} />}
+      <McpPanel open={mcpOpen} onClose={() => setMcpOpen(false)} onChange={setMcpServers} />
     </>
   );
 }

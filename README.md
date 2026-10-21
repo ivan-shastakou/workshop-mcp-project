@@ -26,9 +26,6 @@ backend and chat-service verify JWTs with auth-service /.well-known/jwks.json
 
 ## AI assistant (chat-service)
 
-> On the workshop branches the assistant is built up step by step: on `raw` chat-service only echoes the message,
-> the features described below are complete from `step6-timeouts-and-errors` on (see [WORKSHOP.md](WORKSHOP.md)).
-
 The chat is available in two places, both talking to the same `chat-service` (so the conversation is the same):
 
 - the "AI Assistant" tab on the right edge of the booking calendar opens a chat panel that slides in from the right;
@@ -52,12 +49,44 @@ Until the key is set, the chat answers with "Gemini API key is not configured". 
 - Each Gemini call is limited to `chat.gemini.timeout` (90s); the Google SDK default is no timeout at all. Rate limit
   (429), overload (503) and timeout errors are shown to the user as readable messages.
 - The assistant does not read or change bookings yet; that is planned via the MCP server of the booking backend.
+  Other tools can already be added by users as MCP servers (see below).
 
 | Method | Path                | Description                                                  |
 |--------|---------------------|--------------------------------------------------------------|
 | POST   | `/api/chat`         | `{message, timeZone}` → `text/event-stream` with the answer   |
 | GET    | `/api/chat/history` | Messages of the current conversation                         |
 | DELETE | `/api/chat/history` | Start a new conversation                                     |
+
+## MCP servers in the chat (configured from the chat UI)
+
+Users can connect their own [MCP](https://modelcontextprotocol.io) servers to the assistant: the **🔌 MCP** button in
+the standalone chat UI (http://localhost:3001) and in the header of the booking UI's chat panel (http://localhost:3000)
+opens the same panel to add, test, enable/disable, reconnect and remove servers. Both talk to the same `chat-service`,
+so the servers are shared, and tools of all enabled servers are offered to Gemini with every chat request. Tool names are prefixed with the server name, e.g. `github__search_code`.
+
+- **Add:** name, URL (`https://host/path`; without a path `/mcp` is used, `/sse` for the legacy SSE transport),
+  transport (Streamable HTTP or SSE) and an optional auth header such as `Authorization: Bearer …`.
+  *Test connection* connects and lists the tools without saving. Example server without auth:
+  `https://mcp.deepwiki.com/mcp`.
+- **Per user:** servers belong to the user who added them; nobody else sees or uses them.
+- **Storage:** table `mcp_server` in `chat-db` (Flyway migration in `chat-service`). Auth header values are encrypted
+  with AES-256-GCM (`MCP_SECRETS_KEY` / `MCP_SECRETS_SALT` in `.env`) and only shown masked (`Bear…a1b2`).
+- **Connections:** opened on first use, kept open, closed after 30 minutes without use (`mcp.idle-timeout`). Servers
+  that cannot be reached are skipped, so the chat keeps working. Limits: 10 servers per user, 64 tools per request.
+- **SSRF protection:** chat-service connects from inside the Docker network, so only public `https://` URLs are
+  accepted; hosts resolving to private, loopback, link-local or CGNAT addresses are rejected, as are credentials in
+  the URL. Internal servers can be allowed explicitly with `MCP_ALLOWED_HOSTS` (comma separated host names).
+- **stdio servers** (local commands) are intentionally not supported from the UI.
+- The assistant is instructed to ask for confirmation before tools that create, change or delete data.
+
+| Method | Path                                | Description                                       |
+|--------|-------------------------------------|---------------------------------------------------|
+| GET    | `/api/mcp/servers`                  | Servers of the current user with status and tools |
+| POST   | `/api/mcp/servers/test`             | `{name, url, transport, headerName, headerValue}` → connect and list tools, nothing saved |
+| POST   | `/api/mcp/servers`                  | Add a server (same body)                          |
+| PATCH  | `/api/mcp/servers/{id}`             | `{enabled}`                                       |
+| POST   | `/api/mcp/servers/{id}/reconnect`   | Close and reopen the connection                   |
+| DELETE | `/api/mcp/servers/{id}`             | Remove a server                                   |
 
 ## Authentication
 
@@ -165,7 +194,7 @@ cd auth-service && ./mvnw spring-boot:run     # http://localhost:8081
 cd chat-service && GEMINI_API_KEY=... ./mvnw spring-boot:run   # http://localhost:8082
 cd backend && ./mvnw spring-boot:run          # http://localhost:8080
 cd frontend && npm install && npm run dev     # http://localhost:5173, proxies /api/auth to :8081, /api/chat to :8082, /api to :8080
-cd chat-ui && npm install && npm run dev      # http://localhost:5174, proxies /api/auth to :8081, /api/chat to :8082
+cd chat-ui && npm install && npm run dev      # http://localhost:5174, proxies /api/auth to :8081, /api/chat and /api/mcp to :8082
 ```
 
 Run tests for all Java services with `./mvnw verify` from the repository root (root `pom.xml` aggregates `backend`, `auth-service`, `chat-service`; open the root folder in IntelliJ IDEA to import all of them). The Maven wrappers are pinned to Maven 3.9.x: IntelliJ IDEA 2025.2 cannot import projects with Maven 3.10.
