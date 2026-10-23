@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -53,10 +54,11 @@ public class McpClientRegistry implements DisposableBean {
     }
 
     /**
-     * Everything needed to open a connection; the header value is already decrypted.
+     * Everything needed to open a connection. The header value is read on every HTTP request instead of once on
+     * connect, so a relayed user token (built-in booking server) is always the latest one.
      */
     public record ConnectionSpec(String name, McpTarget target, McpTransportType transport,
-                                 String headerName, String headerValue) {
+                                 String headerName, Supplier<String> headerValue) {
     }
 
     public record Probe(String serverInfo, List<McpToolInfo> tools) {
@@ -186,8 +188,9 @@ public class McpClientRegistry implements DisposableBean {
 
     private McpClientTransport transport(ConnectionSpec spec) {
         McpSyncHttpClientRequestCustomizer headers = (request, method, uri, body, context) -> {
-            if (spec.headerName() != null && spec.headerValue() != null) {
-                request.header(spec.headerName(), spec.headerValue());
+            var headerValue = spec.headerValue() == null ? null : spec.headerValue().get();
+            if (spec.headerName() != null && headerValue != null) {
+                request.header(spec.headerName(), headerValue);
             }
         };
         return switch (spec.transport()) {

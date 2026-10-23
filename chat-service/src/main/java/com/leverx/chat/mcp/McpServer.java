@@ -44,6 +44,10 @@ public class McpServer {
     @Column(name = "header_value_encrypted", length = 4000)
     private String headerValueEncrypted;
 
+    /** Send the user's own login token (JWT) instead of a stored header; only for allow-listed internal hosts. */
+    @Column(name = "forward_user_token", nullable = false)
+    private boolean forwardUserToken;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -108,6 +112,14 @@ public class McpServer {
 
     public String getHeaderValueEncrypted() {
         return headerValueEncrypted;
+    }
+
+    public boolean isForwardUserToken() {
+        return forwardUserToken;
+    }
+
+    public void setForwardUserToken(boolean forwardUserToken) {
+        this.forwardUserToken = forwardUserToken;
     }
 
     public Instant getCreatedAt() {

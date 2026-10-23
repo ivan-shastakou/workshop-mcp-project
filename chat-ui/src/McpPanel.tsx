@@ -153,6 +153,7 @@ function ServerCard({
           {server.serverInfo && ` · ${server.serverInfo}`}
           {server.transport === 'SSE' && ' · SSE'}
           {server.headerName && ` · ${server.headerName}: ${server.headerValueMasked}`}
+          {server.forwardUserToken && ' · your login token'}
         </span>
       </div>
 
@@ -199,6 +200,7 @@ function AddServerForm({ onCancel, onAdded }: { onCancel: () => void; onAdded: (
   const [transport, setTransport] = useState<McpTransport>('STREAMABLE_HTTP');
   const [headerName, setHeaderName] = useState('Authorization');
   const [headerValue, setHeaderValue] = useState('');
+  const [forwardUserToken, setForwardUserToken] = useState(false);
   const [test, setTest] = useState<McpTestResult | null>(null);
   const [busy, setBusy] = useState<'test' | 'save' | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -207,8 +209,9 @@ function AddServerForm({ onCancel, onAdded }: { onCancel: () => void; onAdded: (
     name: name.trim(),
     url: url.trim(),
     transport,
-    headerName: headerValue.trim() ? headerName.trim() : null,
-    headerValue: headerValue.trim() || null,
+    headerName: !forwardUserToken && headerValue.trim() ? headerName.trim() : null,
+    headerValue: (!forwardUserToken && headerValue.trim()) || null,
+    forwardUserToken,
   });
 
   // any change invalidates a previous test result
@@ -267,7 +270,10 @@ function AddServerForm({ onCancel, onAdded }: { onCancel: () => void; onAdded: (
           placeholder="https://example.com/mcp"
           required
         />
-        <small className="hint">Public https endpoint. Without a path, /mcp (or /sse) is used.</small>
+        <small className="hint">
+          Public https endpoint, or an internal server from MCP_ALLOWED_HOSTS (booking: http://backend:8080/mcp).
+          Without a path, /mcp (or /sse) is used.
+        </small>
       </label>
       <label>
         Transport
@@ -276,23 +282,39 @@ function AddServerForm({ onCancel, onAdded }: { onCancel: () => void; onAdded: (
           <option value="SSE">SSE (legacy)</option>
         </select>
       </label>
-      <div className="row">
-        <label>
-          Auth header
-          <input value={headerName} onChange={(e) => changed(setHeaderName)(e.target.value)} placeholder="Authorization" />
-        </label>
-        <label>
-          Value (optional)
-          <input
-            type="password"
-            value={headerValue}
-            onChange={(e) => changed(setHeaderValue)(e.target.value)}
-            placeholder="Bearer …"
-            autoComplete="off"
-          />
-        </label>
-      </div>
-      <small className="hint">The header value is stored encrypted and never shown again.</small>
+      <label className="checkbox">
+        <input
+          type="checkbox"
+          checked={forwardUserToken}
+          onChange={(e) => changed(setForwardUserToken)(e.target.checked)}
+        />
+        Send my login token
+      </label>
+      <small className="hint">
+        For internal servers that know your account, like the booking server: it acts as you, so bookings are made
+        in your name. Only allowed for hosts in MCP_ALLOWED_HOSTS.
+      </small>
+      {!forwardUserToken && (
+        <>
+          <div className="row">
+            <label>
+              Auth header
+              <input value={headerName} onChange={(e) => changed(setHeaderName)(e.target.value)} placeholder="Authorization" />
+            </label>
+            <label>
+              Value (optional)
+              <input
+                type="password"
+                value={headerValue}
+                onChange={(e) => changed(setHeaderValue)(e.target.value)}
+                placeholder="Bearer …"
+                autoComplete="off"
+              />
+            </label>
+          </div>
+          <small className="hint">The header value is stored encrypted and never shown again.</small>
+        </>
+      )}
 
       {test &&
         (test.success ? (

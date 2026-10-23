@@ -36,8 +36,8 @@ public class McpServerController {
     }
 
     @PostMapping("/test")
-    public McpTestResult test(@Valid @RequestBody McpServerRequest request) {
-        return service.test(request);
+    public McpTestResult test(@Valid @RequestBody McpServerRequest request, @AuthenticationPrincipal Jwt jwt) {
+        return service.test(userId(jwt), request);
     }
 
     @PostMapping

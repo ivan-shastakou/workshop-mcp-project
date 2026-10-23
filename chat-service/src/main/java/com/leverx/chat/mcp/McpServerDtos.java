@@ -17,6 +17,8 @@ public final class McpServerDtos {
      * @param name        short identifier, also used as prefix of the tool names the model sees
      * @param headerName  optional auth header sent with every request, e.g. "Authorization"
      * @param headerValue its value, e.g. "Bearer ..."; stored encrypted and never returned
+     * @param forwardUserToken send the user's own login token as "Authorization: Bearer ..." instead of a header;
+     *                         allowed only for hosts in MCP_ALLOWED_HOSTS, e.g. the booking backend
      */
     public record McpServerRequest(
             @NotBlank @Pattern(regexp = "[A-Za-z0-9_-]{1,40}",
@@ -25,7 +27,8 @@ public final class McpServerDtos {
             @NotNull McpTransportType transport,
             @Pattern(regexp = "[A-Za-z0-9-]{1,100}", message = "must be a valid HTTP header name") String headerName,
             @Size(max = 2000) @Pattern(regexp = "[^\\r\\n]*", message = "must be a single line") String headerValue,
-            Boolean enabled) {
+            Boolean enabled,
+            Boolean forwardUserToken) {
     }
 
     public record McpServerPatch(@NotNull Boolean enabled) {
@@ -44,6 +47,7 @@ public final class McpServerDtos {
             boolean enabled,
             String headerName,
             String headerValueMasked,
+            boolean forwardUserToken,
             ConnectionStatus status,
             String error,
             String serverInfo,

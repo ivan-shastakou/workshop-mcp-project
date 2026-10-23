@@ -22,6 +22,13 @@ class McpUrlValidatorTest {
     }
 
     @Test
+    void onlyAllowListedHostsMayReceiveTheUserToken() {
+        assertThat(validator.isAllowListed("http://MCP-internal:8080/mcp")).isTrue();
+        assertThat(validator.isAllowListed("https://mcp.deepwiki.com/mcp")).isFalse();
+        assertThat(validator.isAllowListed("not a url")).isFalse();
+    }
+
+    @Test
     void usesDefaultEndpointOfTransportWhenUrlHasNoPath() {
         assertThat(validator.validate("https://1.1.1.1", McpTransportType.STREAMABLE_HTTP).endpoint()).isEqualTo("/mcp");
         assertThat(validator.validate("https://1.1.1.1/", McpTransportType.SSE).endpoint()).isEqualTo("/sse");

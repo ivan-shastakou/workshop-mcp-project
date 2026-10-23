@@ -67,6 +67,19 @@ public class McpUrlValidator {
         return new McpTarget(base, endpoint);
     }
 
+    /**
+     * Hosts in MCP_ALLOWED_HOSTS are trusted internal services (e.g. the booking backend); only they may receive
+     * the user's own login token.
+     */
+    public boolean isAllowListed(String rawUrl) {
+        try {
+            var host = new URI(rawUrl.strip()).getHost();
+            return host != null && allowedHosts.contains(host.toLowerCase(Locale.ROOT));
+        } catch (URISyntaxException e) {
+            return false;
+        }
+    }
+
     public void validateHeader(String headerName) {
         if (headerName != null && RESTRICTED_HEADERS.contains(headerName.toLowerCase(Locale.ROOT))) {
             throw ApiProblemException.badRequest("Header '%s' cannot be set".formatted(headerName));

@@ -30,6 +30,7 @@ export interface McpServer {
   enabled: boolean;
   headerName: string | null;
   headerValueMasked: string | null;
+  forwardUserToken: boolean;
   status: 'CONNECTED' | 'ERROR' | 'DISCONNECTED' | 'DISABLED';
   error: string | null;
   serverInfo: string | null;
@@ -43,6 +44,7 @@ export interface McpServerRequest {
   transport: McpTransport;
   headerName: string | null;
   headerValue: string | null;
+  forwardUserToken: boolean;
 }
 
 export interface McpTestResult {

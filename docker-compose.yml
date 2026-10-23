@@ -112,7 +112,8 @@ services:
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
       MCP_SECRETS_KEY: ${MCP_SECRETS_KEY:-dev-only-change-me}
       MCP_SECRETS_SALT: ${MCP_SECRETS_SALT:-5f2c8a91d4e7b036}
-      MCP_ALLOWED_HOSTS: ${MCP_ALLOWED_HOSTS:-}
+      # the booking backend's own MCP server (http://backend:8080/mcp) is inside the Docker network
+      MCP_ALLOWED_HOSTS: ${MCP_ALLOWED_HOSTS:-backend}
       CHAT_LOG_LEVEL: ${CHAT_LOG_LEVEL:-INFO}
       AUTH_JWKS_URI: http://auth-service:8081/.well-known/jwks.json
       JWT_ISSUER: room-booking-auth
